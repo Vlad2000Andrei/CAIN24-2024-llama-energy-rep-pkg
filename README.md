@@ -1,99 +1,69 @@
-# Energy Efficient Code Generation with Code Llama
+# Energy Efficiency Analysis of LLaMA-Generated Code
+This repository is a companion page for the following thesis / publication:
+> *Anonymous Authors*. 2023. Energy Efficiency Analysis of LLaMA-Generated Code. CAIN24.
 
-This repository contains the code used to generate the results for the paper "Energy Efficient Code Generation with Code Llama" by the GreenLab team NoProbllama.
+It contains all the material required for replicating the study, including:
+ - Scripts for generating code using CodeLLama.
+ - Scripts for generating inputs for the code.
+ - Scripts for generating running the experiment using Experiment Runner.
 
-- [Energy Efficient Code Generation with Code Llama](#energy-efficient-code-generation-with-code-llama)
-  - [Setup](#setup)
-    - [Install Dependencies](#install-dependencies)
-  - [Running the Sampling Server](#running-the-sampling-server)
-  - [Running the tests on a RPi](#running-the-tests-on-a-rpi)
-- [Running one instruction](#running-one-instruction)
-- [Bulk-Running Instructions](#bulk-running-instructions)
-
-
-## Setup
-
-### Install Dependencies
-
-Ensure you have [poetry](https://python-poetry.org/docs/) installed. If you do not, you can install it with:
-```
-curl -sSL https://install.python-poetry.org | python3 -
-```
-
-Be sure to follow the instructions in the link above to add poetry to your path and optionally enable auto-completion.
-
-Then, install the dependencies with:
-```
-poetry install
-```
-
-If you're new to poetry, the [documentation](https://python-poetry.org/docs/basic-usage/) is a great place to start. The virtual environment must be activated before running any scripts. This can be done with:
-```
-poetry shell
-```
-
-## Running the Sampling Server
-
-The sampling server is a web server written in Flask for receiving requests to start and stop the experiment sampling. It is located in the `server/` directory. To run the server, execute:
-```
-make run
-```
-
-This starts a dev server, which is sufficient for our needs. The server will be running on `localhost:8080` by default.
-
-The server has two endpoints:
-
-- `/start/<filename>` - Starts the experiment sampling and creates a csv file with the specified filename.
-- `/stop` - Stops the experiment sampling. This will stop the experiment and save the results to the CSV.
-
-
-## Running the tests on a RPi
-
-With the RPi setup and a terminal connected via SSH, the following commands can be used to run the tests.
+## How to cite us
+The scientific article describing design, execution, and main results of this study is available [TODO](https://www.google.com).<br> 
+If this study is helping your research, consider to cite it is as follows, thanks!
 
 ```
-python ./energy/utils/c_compile.py
-./run-experiments.sh
+@article{,
+  title={Energy Efficiency Analysis of LLaMA-Generated Code},
+  author={Vlad-Andrei Cursaru and Laura Duits and Joel Milligan and Damla Ural and Berta Rodriguez-Sanchez and Vincenzo Stoico and Ivano Malavolta},
+  journal={CAIN}
+  volume={???},
+  pages={???},
+  year={2024},
+  publisher={???}
+}
 ```
 
--------------
+## Quick start
 
-# Running one instruction
+Instructions on how to set up the execution environment and perform the experiment are available under [src/README.md](src/README.md).
 
-Requesting a single piece of code can be done using the `run-instruction.sh` wrapper script. Usage is as follows:
+## Repository Structure
+This is the root directory of the repository. The directory is structured as follows:
 
 ```
-./run-instruction.sh <path-to-model-directory> <Temperature> <Programming-Language> <Prompt>
-```
+    root-directory
+    ㄴ src
+    |  ㄴ energy
+    |  |  ㄴ human
+    |  |  ㄴ llama
+    |  |  ㄴ utils
+    |  ㄴ experiment_runner
+    |  ㄴ models
+    |  ㄴ Data Analysis
+    ㄴ data
+```  
 
-For example, this will ask Code Llama to write Hello World in Java, using a model temperature of 0.75:
-```
-./run-instruction.sh ./codellama-7b-instruct/ 0.75 Java "Write hello world."
-```
+The contents of the folders are:
+* The [src](src/) folder contains the scripts for running the experiment and analysing the data, as well as a [README](src/README.md) file explaining how to use them.
+    * The [energy](src/energy/) folder contains scripts for creating the benchmark inputs and the [RunnerConfig.py](src/energy/RunnerConfig.py) file used by experiment runner for executing the experiment. It also contains subfolders.
+        * The [human](src/energy/human/) folder contains the code to be benchmarked for the human implementations of the algorithms.
+        * The [llama](src/energy/llama/) folder contains the code to be benchmarked for the Llama implementations of the algorithms.
+        * The [utils](src/energy/utils/) contains a script for compiling C++ versions of the algorithms.
+    * The [experiment_runner](src/experiment_runner/) folder is where the Experiment Runner tool should be downloaded.
+    * The [models](src/models/) folder is where the CodeLlama model should be downloaded.
+    * The [server](src/server/) folder contains the HTTP Flask server used to facilitate communication between the Raspberry Pi and the Monsoon.
+* The [data](data/) folder contains information on how to access the data generated by the experiments.
 
-# Bulk-Running Instructions
 
-Instructions can be run in bulk using the `run-all.py` wrapper script. The output can be printed to the terminal or to files. The files are generated under `./answers/`.
+## Replication package naming convention
+The final name of this repository, as appearing in the published article, should be formatted according to the following naming convention:
+`CAIN24-2024-llama-energy-rep-pkg`
 
-The prompts are provided in a file where each line is a separate request. The structure of a line is:
-```
-<Language> <Temperature> <Prompt>
-```
+For example, the repository of a research published at the International conference on ICT for Sustainability (ICT4S) in 2022, which investigates cloud tactics would be named `ICT4S-2022-cloud-tactics-rep-pkg`
 
-For example, this file would ask for a hello world program in Python with a temperature of 0.75 and in Java with a temperature of 0.8:
-```
-Python 0.75 Write a Hello World program.
-Java 0.8 Write a Hello World program.
-```
+## Preferred repository license
+As general indication, we suggest to use:
+* [MIT license](https://opensource.org/licenses/MIT) for code-based repositories, and 
+* [Creative Commons Attribution 4.0	(CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/) for text-based repository (papers, docts, etc.).
 
-To execute the contents of the file, the command usage is as such:
-```
-python3 ./run-all.py <path-to-prompts-file> <path-to-model-directory>
-```
-
-For example, using our `prompts.txt` file, we can run:
-```
-python3 ./run-all.py ./prompts.txt ./codellama-7b-instruct/ -f
-```
-
-***Note:*** The 3rd argument is optionally `-f` and will cause the output to be sent to files in the `./answers/` directory. Omitting `-f` will result in the output being printed to the terminal. ***Argument order is strict.***
+For more information on how to add a license to your replication package, refer to the [official GitHUb documentation](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/adding-a-license-to-a-repository).
